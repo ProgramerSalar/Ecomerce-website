@@ -1,5 +1,6 @@
 import {Link} from "react-router-dom"
 import { FaSearch, FaShoppingBag, FaSignInAlt, FaSignOutAlt, FaUser } from "react-icons/fa"
+import { useState } from "react"
 
 
 
@@ -8,10 +9,15 @@ const user = { _id: "dfsrer", role: "admin"}
 
 const Header = () => {
 
+    const [isOpen, setIsOpen] = useState<boolean>(false)
+    const logOutHandler = () => {
+        setIsOpen(false)
+    }
+
   return (
-    <nav>
-        <Link to={"/"}>Home</Link>
-        <Link to={"/search"}>
+    <nav className="header">
+        <Link to={"/"} onClick={() => setIsOpen(false)}>Home</Link>
+        <Link to={"/search"} onClick={() => setIsOpen(false)}>
             <FaSearch />
             </Link>
         <Link to={"/cart"}>
@@ -21,24 +27,24 @@ const Header = () => {
             {
                 user?._id ? (
                     <>
-                    <button>
+                    <button onClick={() => setIsOpen((prev) => !prev)}>
                         <FaUser />
                     </button>
-                    <dialog open={true}>
+                    <dialog open={isOpen}>
                         <div>
                             {
                                 user.role === "admin" && (
-                                    <Link to="/admin/dashboard"> Admin</Link>
+                                    <Link to="/admin/dashboard" onClick={() => setIsOpen(false)}> Admin</Link>
                                 )
                             }
-                            <Link to="/orders">Orders</Link>
-                            <button>
+                            <Link to="/orders" onClick={() => setIsOpen(false)}>Orders</Link>
+                            <button onClick={() => logOutHandler()}>
                                 <FaSignOutAlt />
                             </button>
                         </div>
                     </dialog>
                     </>
-                ) :  <Link to={"/login"}>
+                ) :  <Link to={"/login"} >
                 <FaSignInAlt />
                 </Link>
             }
