@@ -11,6 +11,7 @@ type ProductProps = {
 
 
 
+
 const ProductCard = ({productId,photo,name,price,stock,handler}:ProductProps) => {
   return (
     <div className="product-card">
