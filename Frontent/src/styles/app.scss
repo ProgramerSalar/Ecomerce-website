@@ -40,6 +40,7 @@ $color3: rgb(0, 104, 136);
 @import "admin-styles/chart";
 @import "admin-styles/dashboardapp";
 @import "admin-styles/mediaquery";
+@import "home";
 
 .header {
   @include flex(row, flex-end, stretch, 1.2rem);
@@ -81,14 +82,6 @@ $color3: rgb(0, 104, 136);
   
 
 
-
-
-
-
-
-
-
-  
 }
 
 
