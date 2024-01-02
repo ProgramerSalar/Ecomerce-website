@@ -4,7 +4,7 @@ import { useState } from "react"
 
 
 
-const user = { _id: "", role: ""}
+const user = { _id: "darer", role: "admin"}
 
 
 const Header = () => {
