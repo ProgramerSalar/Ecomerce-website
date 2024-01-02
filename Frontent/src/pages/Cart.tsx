@@ -79,7 +79,7 @@ const Cart = () => {
 
 
           {
-            cartItems.length > 0 && <Link>
+            cartItems.length > 0 && <Link to="/shipping">
             Chekout
             </Link>
           }

@@ -42,6 +42,8 @@ $color3: rgb(0, 104, 136);
 @import "admin-styles/mediaquery";
 @import "home";
 @import "cart.scss";
+@import "shipping";
+
 
 .header {
   @include flex(row, flex-end, stretch, 1.2rem);
