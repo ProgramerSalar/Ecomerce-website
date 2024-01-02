@@ -33,6 +33,8 @@ $color3: rgb(0, 104, 136);
   color: rgb(0, 195, 0);
 }
 
+
+
 @import "admin-styles/mixin";
 
 @import "admin-styles/dashboard";
@@ -43,6 +45,7 @@ $color3: rgb(0, 104, 136);
 @import "home";
 @import "cart.scss";
 @import "shipping";
+@import "login";
 
 
 .header {
@@ -129,6 +132,13 @@ $color3: rgb(0, 104, 136);
 
 
 
+.heading {
+
+  @include heading;
+  margin: 1rem, 0;
+  text-align: center;
+  
+}
 
 
 
