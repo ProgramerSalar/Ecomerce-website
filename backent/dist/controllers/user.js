@@ -1,13 +1,16 @@
 import { User } from "../models/user.js";
 export const register = async (req, res, next) => {
     try {
-        const {} = req.body;
-        const user = await User.create({});
+        const { name, email, photo, gender, role, _id, dob } = req.body;
+        const user = await User.create({
+            name, email, photo, gender, role, _id, dob
+        });
         res.status(200).json({
             success: true,
-            message: `Welcome ${user.name}`
+            message: `Welcome ${user.name}`,
         });
     }
     catch (error) {
+        console.log(error);
     }
 };
