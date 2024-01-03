@@ -13,7 +13,7 @@ export const register = TryCatch(
         next: NextFunction
       ) => {
       
-        //   throw new Error("some error")
+          throw new Error("some error")
           const {name,email,photo,gender,role,_id,dob} = req.body;
           const user = await User.create({
               name,email,photo,gender,role,_id,dob

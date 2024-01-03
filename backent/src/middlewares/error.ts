@@ -19,6 +19,6 @@ export const errorMiddleware = (
 
 export const TryCatch =
   (func: ControllerType) =>
-  (req: Response, res: Response, next: NextFunction) => {
-    return Promise.resolve(func(req, res, next));
+  (req: Request, res: Response, next: NextFunction) => {
+    return Promise.resolve(func(req, res, next)).catch(next);
   };
