@@ -8,37 +8,20 @@ import {
 import { Product } from "../models/product.js";
 import { ErrorHandler } from "../utils/utility-class.js";
 import { rm } from "fs";
-import {faker} from "@faker-js/faker"
+import {faker, tr} from "@faker-js/faker"
 import { count } from "console";
 import { myCache } from "../app.js";
+import { invalidateCache } from "../utils/features.js";
 
-export const newProduct = TryCatch(
-  async (req: Request<{}, {}, NewProductRequestBody>, res, next) => {
-    const { name, price, stock, category } = req.body;
 
-    const photo = req.file;
-    if (!photo) return next(new ErrorHandler("Please add Photo", 401));
 
-    if (!name || !price || !stock || !category) {
-      rm(photo.path, () => {
-        console.log("deleted");
-      });
-      return next(new ErrorHandler("please Enter All Fields", 401));
-    }
-    await Product.create({
-      name,
-      price,
-      stock,
-      category: category.toLowerCase(),
-      photo: photo.path,
-    });
 
-    return res.status(201).json({
-      success: true,
-      message: "Product Created Successfully",
-    });
-  }
-);
+
+
+
+
+
+
 
 export const getLatestProduct = TryCatch(async (req, res, next) => {
 
@@ -123,6 +106,37 @@ export const getSingleProduct = TryCatch(async (req, res, next) => {
   });
 });
 
+export const newProduct = TryCatch(
+  async (req: Request<{}, {}, NewProductRequestBody>, res, next) => {
+    const { name, price, stock, category } = req.body;
+
+    const photo = req.file;
+    if (!photo) return next(new ErrorHandler("Please add Photo", 401));
+
+    if (!name || !price || !stock || !category) {
+      rm(photo.path, () => {
+        console.log("deleted");
+      });
+      return next(new ErrorHandler("please Enter All Fields", 401));
+    }
+    await Product.create({
+      name,
+      price,
+      stock,
+      category: category.toLowerCase(),
+      photo: photo.path,
+    });
+
+    await invalidateCache({product:true})
+
+    return res.status(201).json({
+      success: true,
+      message: "Product Created Successfully",
+    });
+  }
+);
+
+
 export const UpdateProduct = TryCatch(async (req, res, next) => {
   const { id } = req.params;
   const { name, price, stock, category } = req.body;
@@ -146,6 +160,8 @@ export const UpdateProduct = TryCatch(async (req, res, next) => {
   if (category) product.category = category;
 
   await product.save();
+  await invalidateCache({product:true})
+
 
   return res.status(201).json({
     success: true,
@@ -164,6 +180,7 @@ export const DeletedProduct = TryCatch(async (req, res, next) => {
     }
   );
   await product.deleteOne();
+  await invalidateCache({product:true})
 
   return res.status(200).json({
     success: true,
