@@ -1,11 +1,12 @@
 import mongoose from "mongoose";
+import { invalidateCacheProps } from "../types/types.js";
 
 
 
 export const connectDB = () => {
     
     try{
-        const database = mongoose.connect('mongodb+srv://udamy_user:vfVjiniUHSosqrV2@cluster0.8r3vhxn.mongodb.net/?retryWrites=true&w=majority', 
+        const database = mongoose.connect(process.env.MONGO_DB as string, 
    { dbName:"Ecomerce-2024"}
     ).then(
         (c) => console.log('Database is Connected......')
@@ -14,3 +15,7 @@ export const connectDB = () => {
         console.log(error)
     }
 }
+
+
+
+
