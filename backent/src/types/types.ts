@@ -9,6 +9,14 @@ export interface NewUserRequestBody {
   _id: string;
   dob: Date;
 }
+export interface NewProductRequestBody {
+  name: string;
+  photo: string;
+  price:Number;
+  stock:Number;
+  category:string;
+
+}
 
 export type ControllerType = (
   req: Request,
