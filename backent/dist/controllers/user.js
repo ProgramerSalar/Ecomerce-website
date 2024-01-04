@@ -1,13 +1,49 @@
 import { User } from "../models/user.js";
+import { ErrorHandler } from "../utils/utility-class.js";
 import { TryCatch } from "../middlewares/error.js";
 export const register = TryCatch(async (req, res, next) => {
-    throw new Error("some error");
     const { name, email, photo, gender, role, _id, dob } = req.body;
-    const user = await User.create({
+    let user = await User.findById(_id);
+    if (user)
+        return res.status(200).json({
+            success: true,
+            message: `Welcome, ${user.name}`
+        });
+    if (!_id || !name || !email || !photo || !gender || !dob)
+        return next(new ErrorHandler("Please all All FIelds", 400));
+    user = await User.create({
         name, email, photo, gender, role, _id, dob
     });
     res.status(200).json({
         success: true,
         message: `Welcome ${user.name}`,
+    });
+});
+export const getAllUser = TryCatch(async (req, res, next) => {
+    const users = await User.find({});
+    return res.status(201).json({
+        success: true,
+        message: users
+    });
+});
+export const getUser = TryCatch(async (req, res, next) => {
+    const id = req.params.id;
+    const user = await User.findById(id);
+    if (!user)
+        return next(new ErrorHandler("User is not Exist!", 400));
+    return res.status(201).json({
+        success: true,
+        message: user
+    });
+});
+export const deleteUser = TryCatch(async (req, res, next) => {
+    const id = req.params.id;
+    const user = await User.findById(id);
+    if (!user)
+        return next(new ErrorHandler("User is not Exist!", 400));
+    await user?.deleteOne();
+    return res.status(201).json({
+        success: true,
+        message: 'User Deleted Successfully'
     });
 });
