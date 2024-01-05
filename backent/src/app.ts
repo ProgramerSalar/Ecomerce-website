@@ -24,12 +24,15 @@ import { errorMiddleware } from "./middlewares/error.js"
 import productRoutes from "./routes/product.js"
 import orderRoutes from "./routes/orders.js"
 import paymentRoutes from "./routes/payment.js"
+import dashboardRoutes from "./routes/stats.js"
 
 
 app.use("/api/v1/user", userRoutes)
 app.use("/api/v1/product", productRoutes)
 app.use("/api/v1/orders", orderRoutes)
 app.use("/api/v1/payment", paymentRoutes)
+app.use("/api/v1/dashboard", dashboardRoutes)
+
 
 // error middleware 
 app.use(errorMiddleware)
