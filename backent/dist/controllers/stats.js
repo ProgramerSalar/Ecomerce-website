@@ -67,7 +67,7 @@ export const getDashboard = TryCatch(async (req, res, next) => {
                 $lte: today,
             }
         });
-        const [thisMonthProducts, thisMonthUser, thisMonthOrders, lastMonthProducts, lastMonthUser, lastMonthOrders, productCount, userCount, allOrders, lastSixMonthOrders,] = await Promise.all([
+        const [thisMonthProducts, thisMonthUser, thisMonthOrders, lastMonthProducts, lastMonthUser, lastMonthOrders, productCount, userCount, allOrders, lastSixMonthOrders, categories] = await Promise.all([
             thisMonthProductsPromise,
             thisMonthUserPromise,
             thisMonthOrdersPromise,
@@ -78,6 +78,7 @@ export const getDashboard = TryCatch(async (req, res, next) => {
             User.countDocuments(),
             Order.find({}).select("total"),
             lastSixMonthOrderPromise,
+            Product.distinct("category")
         ]);
         const thisMonthRevenue = thisMonthOrders.reduce((total, order) => total + (order.total || 0), 0);
         const lastMonthRevenue = lastMonthOrders.reduce((total, order) => total + (order.total || 0), 0);
@@ -104,7 +105,16 @@ export const getDashboard = TryCatch(async (req, res, next) => {
                 orderMonthRevinew[6 - monthDiff - 1] += order.total;
             }
         });
+        const categoriesCountPromise = categories.map((category) => Product.countDocuments({ category }));
+        const categoriesCount = await Promise.all(categoriesCountPromise);
+        const categoryCount = []; // categoryCount ka Rrecord me  string or number in array
+        categories.forEach((category, i) => {
+            categoryCount.push({
+                [category]: Math.round((categoriesCount[i] / productCount) * 100)
+            });
+        });
         stats = {
+            categoryCount,
             changepercent,
             count,
             chart: {

@@ -87,7 +87,7 @@ export const getDashboard = TryCatch(async (req, res, next) => {
       userCount,
       allOrders,
       lastSixMonthOrders,
-      
+      categories
     ] = await Promise.all([
       thisMonthProductsPromise,
       thisMonthUserPromise,
@@ -99,6 +99,7 @@ export const getDashboard = TryCatch(async (req, res, next) => {
       User.countDocuments(),
       Order.find({}).select("total"),
       lastSixMonthOrderPromise,
+      Product.distinct("category")
       
     ]);
 
@@ -150,7 +151,17 @@ export const getDashboard = TryCatch(async (req, res, next) => {
         }
     })
 
+    const categoriesCountPromise = categories.map((category) => Product.countDocuments({category}))
+    const categoriesCount = await Promise.all(categoriesCountPromise)
+    const categoryCount:Record<string,number>[] = []    // categoryCount ka Rrecord me  string or number in array
+    categories.forEach((category, i) => {
+        categoryCount.push({
+            [category]:Math.round((categoriesCount[i] / productCount) * 100)
+        })
+    })
+
     stats = {
+        categoryCount,
       changepercent,
       count,
       chart:{
