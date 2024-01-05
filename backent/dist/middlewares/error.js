@@ -3,9 +3,10 @@ export const errorMiddleware = (err, req, res, next) => {
     err.statusCode || (err.statusCode = 500);
     if (err.name === "CastError")
         err.message = "Invalid ID";
+    // if(err.statusCode === 500) err.message = "Please create New Coupon"
     return res.status(err.statusCode).json({
         success: false,
-        message: err.message,
+        message: err.message
     });
 };
 export const TryCatch = (func) => (req, res, next) => {

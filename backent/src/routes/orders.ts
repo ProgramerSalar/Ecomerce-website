@@ -8,6 +8,6 @@ const app = express.Router()
 app.post("/new", newOrder)
 app.get("/my", myOrder )
 app.get("/all", isAdmin, AllOrders)
-app.route("/:id").get(getSingleOrder).put(processOrder).delete(deleteOrder)
+app.route("/:id").get(isAdmin,getSingleOrder).put(isAdmin,processOrder).delete(isAdmin,deleteOrder)
 
 export default app;

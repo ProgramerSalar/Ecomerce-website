@@ -23,12 +23,13 @@ import { connectDB } from "./utils/features.js"
 import { errorMiddleware } from "./middlewares/error.js"
 import productRoutes from "./routes/product.js"
 import orderRoutes from "./routes/orders.js"
-
+import paymentRoutes from "./routes/payment.js"
 
 
 app.use("/api/v1/user", userRoutes)
 app.use("/api/v1/product", productRoutes)
 app.use("/api/v1/orders", orderRoutes)
+app.use("/api/v1/payment", paymentRoutes)
 
 // error middleware 
 app.use(errorMiddleware)

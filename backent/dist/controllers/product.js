@@ -1,10 +1,10 @@
+import { faker } from "@faker-js/faker";
+import { rm } from "fs";
+import { myCache } from "../app.js";
 import { TryCatch } from "../middlewares/error.js";
 import { Product } from "../models/product.js";
-import { ErrorHandler } from "../utils/utility-class.js";
-import { rm } from "fs";
-import { faker } from "@faker-js/faker";
-import { myCache } from "../app.js";
 import { invalidateCache } from "../utils/features.js";
+import { ErrorHandler } from "../utils/utility-class.js";
 export const getLatestProduct = TryCatch(async (req, res, next) => {
     let products;
     if (myCache.has("latest-product"))
