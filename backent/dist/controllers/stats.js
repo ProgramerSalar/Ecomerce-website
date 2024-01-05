@@ -67,7 +67,8 @@ export const getDashboard = TryCatch(async (req, res, next) => {
                 $lte: today,
             }
         });
-        const [thisMonthProducts, thisMonthUser, thisMonthOrders, lastMonthProducts, lastMonthUser, lastMonthOrders, productCount, userCount, allOrders, lastSixMonthOrders, categories] = await Promise.all([
+        const latestTransationsPromise = Order.find({}).select(["orderItems", "discount", "total", "status"]).limit(4);
+        const [thisMonthProducts, thisMonthUser, thisMonthOrders, lastMonthProducts, lastMonthUser, lastMonthOrders, productCount, userCount, allOrders, lastSixMonthOrders, categories, femaleUserCounts, latestTransation,] = await Promise.all([
             thisMonthProductsPromise,
             thisMonthUserPromise,
             thisMonthOrdersPromise,
@@ -78,7 +79,9 @@ export const getDashboard = TryCatch(async (req, res, next) => {
             User.countDocuments(),
             Order.find({}).select("total"),
             lastSixMonthOrderPromise,
-            Product.distinct("category")
+            Product.distinct("category"),
+            User.countDocuments({ gender: "female" }),
+            latestTransationsPromise
         ]);
         const thisMonthRevenue = thisMonthOrders.reduce((total, order) => total + (order.total || 0), 0);
         const lastMonthRevenue = lastMonthOrders.reduce((total, order) => total + (order.total || 0), 0);
@@ -113,6 +116,17 @@ export const getDashboard = TryCatch(async (req, res, next) => {
                 [category]: Math.round((categoriesCount[i] / productCount) * 100)
             });
         });
+        const modifiedLatestTransation = latestTransation.map((i) => ({
+            _id: i._id,
+            discount: i.discount,
+            amount: i.total,
+            quantity: i.orderItems.length,
+            status: i.status
+        }));
+        const userRatio = {
+            male: userCount - femaleUserCounts,
+            female: femaleUserCounts,
+        };
         stats = {
             categoryCount,
             changepercent,
@@ -120,8 +134,11 @@ export const getDashboard = TryCatch(async (req, res, next) => {
             chart: {
                 order: orderMonthCounts,
                 revinew: orderMonthRevinew
-            }
+            },
+            userRatio,
+            latestTransation: modifiedLatestTransation,
         };
+        myCache.set(key, JSON.stringify(stats));
     }
     return res.status(200).json({
         success: true,
