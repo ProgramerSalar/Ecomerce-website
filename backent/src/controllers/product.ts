@@ -9,7 +9,6 @@ import { Product } from "../models/product.js";
 import { ErrorHandler } from "../utils/utility-class.js";
 import { rm } from "fs";
 import {faker, tr} from "@faker-js/faker"
-import { count } from "console";
 import { myCache } from "../app.js";
 import { invalidateCache } from "../utils/features.js";
 
@@ -160,7 +159,7 @@ export const UpdateProduct = TryCatch(async (req, res, next) => {
   if (category) product.category = category;
 
   await product.save();
-  await invalidateCache({product:true})
+  await invalidateCache({product:true, productId:String(product._id)})
 
 
   return res.status(201).json({
@@ -180,7 +179,8 @@ export const DeletedProduct = TryCatch(async (req, res, next) => {
     }
   );
   await product.deleteOne();
-  await invalidateCache({product:true})
+  await invalidateCache({product:true, productId:String(product._id)})
+
 
   return res.status(200).json({
     success: true,

@@ -48,10 +48,12 @@ export interface BaseQuery {
 
 
 export type invalidateCacheProps = {
-
   product?:boolean;
   order?:boolean;
   admin?:boolean;
+  userId?:string;
+  orderId?:string;
+  productId?:string | string[];
 }
 
 
@@ -63,6 +65,9 @@ export type OrderItemType = {
   quantity:number;
   productId:string;
 }
+
+
+
 export type shippingInfoType = {
   address:string;
   city:string;

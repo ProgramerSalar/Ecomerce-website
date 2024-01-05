@@ -9,8 +9,20 @@ export const register = TryCatch(async (req, res, next) => {
             success: true,
             message: `Welcome, ${user.name}`
         });
-    if (!_id || !name || !email || !photo || !gender || !dob)
-        return next(new ErrorHandler("Please all All FIelds", 400));
+    // if(!_id || !name || !email || !photo || !gender || !dob)
+    // return next(new ErrorHandler("Please all All FIelds", 400))
+    if (!_id)
+        return next(new ErrorHandler("Please Enter Id", 404));
+    if (!name)
+        return next(new ErrorHandler("Please Enter Name", 404));
+    if (!email)
+        return next(new ErrorHandler("Please Enter Email", 404));
+    if (!photo)
+        return next(new ErrorHandler("Please Enter photo", 404));
+    if (!gender)
+        return next(new ErrorHandler("Please Enter gender", 404));
+    if (!dob)
+        return next(new ErrorHandler("Please Enter date of Birth", 404));
     user = await User.create({
         name, email, photo, gender, role, _id, dob
     });
