@@ -104,7 +104,7 @@ export const getDashboard = TryCatch(async (req, res, next) => {
         const orderMonthRevinew = new Array(6).fill(0);
         lastSixMonthOrders.forEach((order) => {
             const creatationDate = order.createdAt;
-            const monthDiff = today.getMonth() - creatationDate.getMonth();
+            const monthDiff = (today.getMonth() - creatationDate.getMonth() + 12) % 12;
             if (monthDiff < 6) {
                 orderMonthCounts[6 - monthDiff - 1] += 1;
                 orderMonthRevinew[6 - monthDiff - 1] += order.total;
