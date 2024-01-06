@@ -11,13 +11,13 @@ export const connectDB = () => {
         console.log(error);
     }
 };
-export const invalidateCache = async ({ product, order, admin, userId, orderId, productId }) => {
+export const invalidateCache = async ({ product, order, admin, userId, orderId, productId, }) => {
     if (product) {
         const productKeys = [
             "latest-product",
             "categories",
             "all-products",
-            `product-${productId}`
+            `product-${productId}`,
         ];
         if (typeof productId === "string")
             productKeys.push(`product-${productId}`); // productId string push the product of id
@@ -31,7 +31,7 @@ export const invalidateCache = async ({ product, order, admin, userId, orderId, 
         const ordersKeys = [
             "all-orders",
             `my-orders-${userId}`,
-            `order-${orderId}`
+            `order-${orderId}`,
         ];
         const orders = await Product.find({}).select("_id");
         orders.forEach((i) => {
@@ -47,7 +47,7 @@ export const reduceStock = async (orderItems) => {
         const order = orderItems[index];
         const product = await Product.findById(order.productId);
         if (!product)
-            throw (new Error("Product Not Found"));
+            throw new Error("Product Not Found");
         product.stock -= order.quantity;
         await product.save();
     }
@@ -57,4 +57,15 @@ export const calculatePercentage = (thisMonth, lastMonth) => {
         return thisMonth * 100;
     const percent = ((thisMonth - lastMonth) / lastMonth) * 100;
     return Number(percent.toFixed(0));
+};
+export const getInventeries = async ({ categories, productCount, }) => {
+    const categoriesCountPromise = categories.map((category) => Product.countDocuments({ category }));
+    const categoriesCount = await Promise.all(categoriesCountPromise);
+    const categoryCount = []; // categoryCount ka Rrecord me  string or number in array
+    categories.forEach((category, i) => {
+        categoryCount.push({
+            [category]: Math.round((categoriesCount[i] / productCount) * 100),
+        });
+    });
+    return categoryCount;
 };

@@ -3,7 +3,7 @@ import { TryCatch } from "../middlewares/error.js";
 import { Order } from "../models/order.js";
 import { Product } from "../models/product.js";
 import { User } from "../models/user.js";
-import { calculatePercentage } from "../utils/features.js";
+import { calculatePercentage, getInventeries } from "../utils/features.js";
 export const getDashboard = TryCatch(async (req, res, next) => {
     let stats = {};
     const key = "admin-stats";
@@ -108,14 +108,8 @@ export const getDashboard = TryCatch(async (req, res, next) => {
                 orderMonthRevinew[6 - monthDiff - 1] += order.total;
             }
         });
-        const categoriesCountPromise = categories.map((category) => Product.countDocuments({ category }));
-        const categoriesCount = await Promise.all(categoriesCountPromise);
-        const categoryCount = []; // categoryCount ka Rrecord me  string or number in array
-        categories.forEach((category, i) => {
-            categoryCount.push({
-                [category]: Math.round((categoriesCount[i] / productCount) * 100)
-            });
-        });
+        // categoryCount ka Rrecord me  string or number in array
+        const categoryCount = await getInventeries({ categories, productCount });
         const modifiedLatestTransation = latestTransation.map((i) => ({
             _id: i._id,
             discount: i.discount,
@@ -145,6 +139,32 @@ export const getDashboard = TryCatch(async (req, res, next) => {
         stats,
     });
 });
-export const getPiChart = TryCatch(async (req, res, next) => { });
-export const getBarChart = TryCatch(async (req, res, next) => { });
+export const getPiChart = TryCatch(async (req, res, next) => {
+    let charts;
+    const key = "admin-pie-charts";
+    if (myCache.has(key))
+        charts = JSON.parse(myCache.get(key));
+    else {
+        const [processingOrder, shippedOrder, deliveredOrder] = await Promise.all([
+            Order.countDocuments({ status: "Processing" }),
+            Order.countDocuments({ status: "Shipped" }),
+            Order.countDocuments({ status: "Delivered" })
+        ]);
+        const orderFullFillment = {
+            processing: processingOrder,
+            shipped: shippedOrder,
+            deliver: deliveredOrder
+        };
+        charts = {
+            orderFullFillment
+        };
+        myCache.set(key, JSON.stringify(charts));
+    }
+    return res.status(200).json({
+        success: true,
+        charts
+    });
+});
+export const getBarChart = TryCatch(async (req, res, next) => {
+});
 export const getlineChart = TryCatch(async (req, res, next) => { });

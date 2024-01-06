@@ -19,71 +19,78 @@ export const invalidateCache = async ({
   admin,
   userId,
   orderId,
-  productId
+  productId,
 }: invalidateCacheProps) => {
   if (product) {
     const productKeys: string[] = [
       "latest-product",
       "categories",
       "all-products",
-      `product-${productId}`
+      `product-${productId}`,
     ];
 
-    if(typeof productId === "string" ) productKeys.push(`product-${productId}`)     // productId string push the product of id
-  if(typeof productId === "object") 
-  {
-    productId.forEach((i) => productKeys.push(`product-${i}`))  // array
-    // console.log("Hello world")
-  } 
-    
+    if (typeof productId === "string") productKeys.push(`product-${productId}`); // productId string push the product of id
+    if (typeof productId === "object") {
+      productId.forEach((i) => productKeys.push(`product-${i}`)); // array
+      // console.log("Hello world")
+    }
 
-    myCache.del(productKeys)
+    myCache.del(productKeys);
   }
 
-  if(order){
-
+  if (order) {
     const ordersKeys: string[] = [
       "all-orders",
       `my-orders-${userId}`,
-      `order-${orderId}`
-    ]
-    const orders = await Product.find({}).select("_id")
+      `order-${orderId}`,
+    ];
+    const orders = await Product.find({}).select("_id");
     orders.forEach((i) => {
-      ordersKeys.push()
-  })
+      ordersKeys.push();
+    });
 
-  myCache.del(ordersKeys)
-
+    myCache.del(ordersKeys);
   }
-  if(admin){
-
+  if (admin) {
   }
+};
+
+export const reduceStock = async (orderItems: OrderItemType[]) => {
+  for (let index = 0; index < orderItems.length; index++) {
+    const order = orderItems[index];
+    const product = await Product.findById(order.productId);
+    if (!product) throw new Error("Product Not Found");
+    product.stock -= order.quantity;
+    await product.save();
+  }
+};
+
+export const calculatePercentage = (thisMonth: number, lastMonth: number) => {
+  if (lastMonth === 0) return thisMonth * 100;
+  const percent = ((thisMonth - lastMonth) / lastMonth) * 100;
+  return Number(percent.toFixed(0));
 };
 
 
 
 
 
-export const reduceStock = async(orderItems:OrderItemType[]) => {
-
-    for (let index = 0; index < orderItems.length; index++) {
-        const order = orderItems[index]
-        const product = await Product.findById(order.productId)
-        if(!product) throw(new Error("Product Not Found"))
-        product.stock -= order.quantity;
-        await product.save()
-        
-        
-    }
-
-}
-
-
-
-export const calculatePercentage = (thisMonth:number, lastMonth:number) => {
-
-if(lastMonth === 0) return thisMonth*100
-  const percent = ((thisMonth - lastMonth) / lastMonth) * 100 
-  return Number(percent.toFixed(0))
-
-}
+export const getInventeries = async ({
+  categories,
+  productCount,
+}: {
+  categories: string[];
+  productCount:number;
+}) => {
+  const categoriesCountPromise = categories.map((category) =>
+    Product.countDocuments({ category })
+  );
+  const categoriesCount = await Promise.all(categoriesCountPromise);
+  const categoryCount: Record<string, number>[] = []; // categoryCount ka Rrecord me  string or number in array
+  categories.forEach((category, i) => {
+    categoryCount.push({
+      [category]: Math.round((categoriesCount[i] / productCount) * 100),
+    });
+  });
+  return categoryCount;
+};
