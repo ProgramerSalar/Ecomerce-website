@@ -70,3 +70,14 @@ export const getInventeries = async ({ categories, productCount, }) => {
     });
     return categoryCount;
 };
+export const getChartData = ({ length, docArr, today }) => {
+    const data = new Array(length).fill(0);
+    docArr.forEach((i) => {
+        const creatationDate = i.createdAt;
+        const monthDiff = (today.getMonth() - creatationDate.getMonth() + 12) % 12;
+        if (monthDiff < 6) {
+            data[length - monthDiff - 1] += 1;
+        }
+    });
+    return data;
+};

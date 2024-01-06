@@ -215,5 +215,46 @@ export const getPiChart = TryCatch(async (req, res, next) => {
         charts,
     });
 });
-export const getBarChart = TryCatch(async (req, res, next) => { });
+export const getBarChart = TryCatch(async (req, res, next) => {
+    let charts;
+    const key = "admin-bar-charts";
+    if (myCache.has(key))
+        charts = JSON.parse(myCache.get(key)); // same things You use as string ya null operator(!)
+    else {
+        const today = new Date();
+        const sixMonthAgo = new Date();
+        sixMonthAgo.setMonth(sixMonthAgo.getMonth() - 6);
+        const twelveMonthAgo = new Date();
+        sixMonthAgo.setMonth(sixMonthAgo.getMonth() - 12);
+        const lastSixMonthProductPromise = Product.find({
+            createdAt: {
+                $gte: sixMonthAgo,
+                $lte: today,
+            },
+        });
+        const lastSixMonthUsersPromise = Product.find({
+            createdAt: {
+                $gte: sixMonthAgo,
+                $lte: today,
+            },
+        });
+        const lastTwelveMonthOrdersPromise = Product.find({
+            createdAt: {
+                $gte: twelveMonthAgo,
+                $lte: today,
+            },
+        });
+        const [products, users, orders] = await Promise.all([
+            lastSixMonthProductPromise,
+            lastSixMonthUsersPromise,
+            lastTwelveMonthOrdersPromise
+        ]);
+        charts = {};
+        myCache.set(key, JSON.stringify(charts));
+    }
+    return res.status(200).json({
+        success: true,
+        charts,
+    });
+});
 export const getlineChart = TryCatch(async (req, res, next) => { });

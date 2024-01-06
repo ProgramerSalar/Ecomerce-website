@@ -95,3 +95,32 @@ export const getInventeries = async ({
   });
   return categoryCount;
 };
+
+
+interface MyDocument extends Document{
+  createdAt:Date;
+}
+
+type FuncProps = {
+  length: number;
+  docArr: MyDocument[];
+  today:Date;
+}
+
+export const getChartData = ({length, docArr, today}:FuncProps) => {
+
+ 
+  const data:number[] = new Array(length).fill(0);
+
+  docArr.forEach((i) => {
+    const creatationDate = i.createdAt;
+    const monthDiff = (today.getMonth() - creatationDate.getMonth() + 12) % 12
+
+    if (monthDiff < 6) {
+      data[length - monthDiff - 1] += 1;
+      
+    }
+  });
+
+  return data
+}
