@@ -60,14 +60,16 @@ export const getDashboard = TryCatch(async (req, res, next) => {
                 $lte: lastMonth.end,
             },
         });
-        // last six month order 
+        // last six month order
         const lastSixMonthOrderPromise = Order.find({
             createdAt: {
                 $gte: sixMonthAgo,
                 $lte: today,
-            }
+            },
         });
-        const latestTransationsPromise = Order.find({}).select(["orderItems", "discount", "total", "status"]).limit(4);
+        const latestTransationsPromise = Order.find({})
+            .select(["orderItems", "discount", "total", "status"])
+            .limit(4);
         const [thisMonthProducts, thisMonthUser, thisMonthOrders, lastMonthProducts, lastMonthUser, lastMonthOrders, productCount, userCount, allOrders, lastSixMonthOrders, categories, femaleUserCounts, latestTransation,] = await Promise.all([
             thisMonthProductsPromise,
             thisMonthUserPromise,
@@ -81,7 +83,7 @@ export const getDashboard = TryCatch(async (req, res, next) => {
             lastSixMonthOrderPromise,
             Product.distinct("category"),
             User.countDocuments({ gender: "female" }),
-            latestTransationsPromise
+            latestTransationsPromise,
         ]);
         const thisMonthRevenue = thisMonthOrders.reduce((total, order) => total + (order.total || 0), 0);
         const lastMonthRevenue = lastMonthOrders.reduce((total, order) => total + (order.total || 0), 0);
@@ -96,7 +98,7 @@ export const getDashboard = TryCatch(async (req, res, next) => {
             revinew: revinew,
             user: userCount,
             product: productCount,
-            order: allOrders.length
+            order: allOrders.length,
         };
         const orderMonthCounts = new Array(6).fill(0);
         const orderMonthRevinew = new Array(6).fill(0);
@@ -115,7 +117,7 @@ export const getDashboard = TryCatch(async (req, res, next) => {
             discount: i.discount,
             amount: i.total,
             quantity: i.orderItems.length,
-            status: i.status
+            status: i.status,
         }));
         const userRatio = {
             male: userCount - femaleUserCounts,
@@ -127,7 +129,7 @@ export const getDashboard = TryCatch(async (req, res, next) => {
             count,
             chart: {
                 order: orderMonthCounts,
-                revinew: orderMonthRevinew
+                revinew: orderMonthRevinew,
             },
             userRatio,
             latestTransation: modifiedLatestTransation,
@@ -145,26 +147,73 @@ export const getPiChart = TryCatch(async (req, res, next) => {
     if (myCache.has(key))
         charts = JSON.parse(myCache.get(key));
     else {
-        const [processingOrder, shippedOrder, deliveredOrder] = await Promise.all([
+        const [processingOrder, shippedOrder, deliveredOrder, categories, productCount, OutOfStock, allOrders, allUsers, adminUsers, CustomerUser,] = await Promise.all([
             Order.countDocuments({ status: "Processing" }),
             Order.countDocuments({ status: "Shipped" }),
-            Order.countDocuments({ status: "Delivered" })
+            Order.countDocuments({ status: "Delivered" }),
+            Product.distinct("category"),
+            Product.countDocuments(),
+            Product.countDocuments({ stock: 0 }),
+            Order.find({}).select([
+                "total",
+                "discount",
+                "subtotal",
+                "tax",
+                "shippingCharges",
+            ]),
+            User.find({}).select(["dob"]),
+            User.countDocuments({ role: "admin" }),
+            User.countDocuments({ role: "user" }),
         ]);
         const orderFullFillment = {
             processing: processingOrder,
             shipped: shippedOrder,
-            deliver: deliveredOrder
+            deliver: deliveredOrder,
+        };
+        const productCategoryRatio = await getInventeries({
+            categories,
+            productCount,
+        });
+        const stockAvailablity = {
+            inStock: productCount - OutOfStock,
+            OutOfStock,
+        };
+        const grossIncome = allOrders.reduce((prev, order) => prev + (order.total || 0), 0);
+        const discount = allOrders.reduce((prev, order) => prev + (order.discount || 0), 0);
+        const productionCost = allOrders.reduce((prev, order) => prev + (order.shippingCharges || 0), 0);
+        const burn = allOrders.reduce((prev, order) => prev + (order.tax || 0), 0);
+        const markatingCost = Math.round(grossIncome * (30 / 100));
+        const netMargin = grossIncome - discount - productionCost - burn - markatingCost;
+        const revinewDistribution = {
+            netMargin,
+            discount,
+            productionCost,
+            burn,
+            markatingCost,
+        };
+        const usersAgeGroup = {
+            teen: allUsers.filter((i) => i.age < 20).length,
+            adult: allUsers.filter((i) => i.age >= 20 && i.age < 40).length,
+            old: allUsers.filter((i) => i.age >= 40).length,
+        };
+        const adminCustomer = {
+            admin: adminUsers,
+            customer: CustomerUser,
         };
         charts = {
-            orderFullFillment
+            orderFullFillment,
+            productCategoryRatio,
+            stockAvailablity,
+            revinewDistribution,
+            usersAgeGroup,
+            adminCustomer,
         };
         myCache.set(key, JSON.stringify(charts));
     }
     return res.status(200).json({
         success: true,
-        charts
+        charts,
     });
 });
-export const getBarChart = TryCatch(async (req, res, next) => {
-});
+export const getBarChart = TryCatch(async (req, res, next) => { });
 export const getlineChart = TryCatch(async (req, res, next) => { });
