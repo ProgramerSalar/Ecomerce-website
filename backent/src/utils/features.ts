@@ -67,21 +67,16 @@ export const reduceStock = async (orderItems: OrderItemType[]) => {
 
 export const calculatePercentage = (thisMonth: number, lastMonth: number) => {
   if (lastMonth === 0) return thisMonth * 100;
-  const percent = (thisMonth 
-     / lastMonth) * 100;
+  const percent = (thisMonth / lastMonth) * 100;
   return Number(percent.toFixed(0));
 };
-
-
-
-
 
 export const getInventeries = async ({
   categories,
   productCount,
 }: {
   categories: string[];
-  productCount:number;
+  productCount: number;
 }) => {
   const categoriesCountPromise = categories.map((category) =>
     Product.countDocuments({ category })
@@ -96,31 +91,64 @@ export const getInventeries = async ({
   return categoryCount;
 };
 
+// interface MyDocument extends Document {
+//   createdAt: Date;
+// }
 
-interface MyDocument extends Document{
-  createdAt:Date;
+// type FuncProps = {
+//   length: number;
+//   docArr: MyDocument[];
+//   today: Date;
+// };
+
+// export const getChartData = ({ length, docArr, today }: FuncProps) => {
+//   const data: number[] = new Array(length).fill(0);
+
+//   docArr.forEach((i) => {
+//     let creatationDate = i.createdAt;
+//     const monthDiff = (today.getMonth() - creatationDate.getMonth() + 12) % 12;
+
+//     if (monthDiff < length) {
+//       data[length - monthDiff - 1] += 1;
+//     }
+//   });
+
+//   return data;
+// };
+
+
+export interface MyDocument extends Document {
+  createdAt: Date;
+  discount?: number;
+  total?: number;
 }
-
 type FuncProps = {
   length: number;
   docArr: MyDocument[];
-  today:Date;
-}
+  today: Date;
+  property?: "discount" | "total";
+};
 
-export const getChartData = ({length, docArr, today}:FuncProps) => {
-
- 
-  const data:number[] = new Array(length).fill(0);
+export const getChartData = ({
+  length,
+  docArr,
+  today,
+  property,
+}: FuncProps) => {
+  const data: number[] = new Array(length).fill(0);
 
   docArr.forEach((i) => {
-    const creatationDate = i.createdAt;
-    const monthDiff = (today.getMonth() - creatationDate.getMonth() + 12) % 12
+    const creationDate = i.createdAt;
+    const monthDiff = (today.getMonth() - creationDate.getMonth() + 12) % 12;
 
-    if (monthDiff < 6) {
-      data[length - monthDiff - 1] += 1;
-      
+    if (monthDiff < length) {
+      if (property) {
+        data[length - monthDiff - 1] += i[property]!;
+      } else {
+        data[length - monthDiff - 1] += 1;
+      }
     }
   });
 
-  return data
-}
+  return data;
+};

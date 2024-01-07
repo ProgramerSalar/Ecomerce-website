@@ -3,7 +3,7 @@ import { TryCatch } from "../middlewares/error.js";
 import { Order } from "../models/order.js";
 import { Product } from "../models/product.js";
 import { User } from "../models/user.js";
-import { calculatePercentage, getInventeries } from "../utils/features.js";
+import { calculatePercentage, getChartData, getInventeries } from "../utils/features.js";
 export const getDashboard = TryCatch(async (req, res, next) => {
     let stats = {};
     const key = "admin-stats";
@@ -215,41 +215,100 @@ export const getPiChart = TryCatch(async (req, res, next) => {
         charts,
     });
 });
+// export const getBarChart = TryCatch(async (req, res, next) => {
+//   let charts;
+//   const key = "admin-bar-charts"
+//   if(myCache.has(key)) charts = JSON.parse(myCache.get(key)!)    // same things You use as string ya null operator(!)
+//   else{
+//     const today = new Date();
+//     const sixMonthAgo = new Date();
+//     sixMonthAgo.setMonth(sixMonthAgo.getMonth() - 6);
+//     const twelveMonthAgo = new Date();
+//     sixMonthAgo.setMonth(sixMonthAgo.getMonth() - 12);
+//     const lastSixMonthProductPromise = Product.find({
+//       createdAt: {
+//         $gte: sixMonthAgo,
+//         $lte: today,
+//       },
+//     }).select("createdAt")
+//     const lastSixMonthUsersPromise = User.find({
+//       createdAt: {
+//         $gte: sixMonthAgo,
+//         $lte: today,
+//       },
+//     }).select("createdAt")
+//     const lastTwelveMonthOrdersPromise = Order.find({
+//       createdAt: {
+//         $gte: twelveMonthAgo,
+//         $lte: today,
+//       },
+//     }).select("createdAt")
+//     const [
+//       products,
+//       users,
+//       orders
+//     ] = await Promise.all([
+//       lastSixMonthProductPromise,
+//       lastSixMonthUsersPromise,
+//       lastTwelveMonthOrdersPromise
+//     ])
+//     const productCounts = getChartData({ length: 6, today, docArr: products });
+//     const userCounts = getChartData({ length: 6, today, docArr: users });
+//     const OrderCounts = getChartData({ length: 6, today, docArr: orders });
+//     charts = {
+//       users:userCounts,
+//       products:productCounts,
+//       orders:OrderCounts,
+//     }
+//     myCache.set(key, JSON.stringify(charts));
+//   }
+//   return res.status(200).json({
+//     success: true,
+//     charts,
+//   });
+// });
 export const getBarChart = TryCatch(async (req, res, next) => {
     let charts;
     const key = "admin-bar-charts";
     if (myCache.has(key))
-        charts = JSON.parse(myCache.get(key)); // same things You use as string ya null operator(!)
+        charts = JSON.parse(myCache.get(key));
     else {
         const today = new Date();
-        const sixMonthAgo = new Date();
-        sixMonthAgo.setMonth(sixMonthAgo.getMonth() - 6);
-        const twelveMonthAgo = new Date();
-        sixMonthAgo.setMonth(sixMonthAgo.getMonth() - 12);
-        const lastSixMonthProductPromise = Product.find({
+        const sixMonthsAgo = new Date();
+        sixMonthsAgo.setMonth(sixMonthsAgo.getMonth() - 6);
+        const twelveMonthsAgo = new Date();
+        twelveMonthsAgo.setMonth(twelveMonthsAgo.getMonth() - 12);
+        const sixMonthProductPromise = Product.find({
             createdAt: {
-                $gte: sixMonthAgo,
+                $gte: sixMonthsAgo,
                 $lte: today,
             },
-        });
-        const lastSixMonthUsersPromise = Product.find({
+        }).select("createdAt");
+        const sixMonthUsersPromise = User.find({
             createdAt: {
-                $gte: sixMonthAgo,
+                $gte: sixMonthsAgo,
                 $lte: today,
             },
-        });
-        const lastTwelveMonthOrdersPromise = Product.find({
+        }).select("createdAt");
+        const twelveMonthOrdersPromise = Order.find({
             createdAt: {
-                $gte: twelveMonthAgo,
+                $gte: twelveMonthsAgo,
                 $lte: today,
             },
-        });
+        }).select("createdAt");
         const [products, users, orders] = await Promise.all([
-            lastSixMonthProductPromise,
-            lastSixMonthUsersPromise,
-            lastTwelveMonthOrdersPromise
+            sixMonthProductPromise,
+            sixMonthUsersPromise,
+            twelveMonthOrdersPromise,
         ]);
-        charts = {};
+        const productCounts = getChartData({ length: 6, today, docArr: products });
+        const usersCounts = getChartData({ length: 6, today, docArr: users });
+        const ordersCounts = getChartData({ length: 12, today, docArr: orders });
+        charts = {
+            users: usersCounts,
+            products: productCounts,
+            orders: ordersCounts,
+        };
         myCache.set(key, JSON.stringify(charts));
     }
     return res.status(200).json({
