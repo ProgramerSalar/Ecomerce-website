@@ -4,6 +4,7 @@ import Loader from "./components/Loader";
 import Header from "./components/Header";
 import Login from "./pages/login";
 import Order from "./pages/order";
+import {Toaster} from "react-hot-toast"
 
 
 const Home = lazy(() => import("./pages/Home"));
@@ -88,6 +89,7 @@ const App = () => {
           ;
         </Routes>
       </Suspense>
+      <Toaster  position="bottom-center"/>
     </Router>
   );
 };
