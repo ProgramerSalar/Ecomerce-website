@@ -3,7 +3,12 @@ import { TryCatch } from "../middlewares/error.js";
 import { Order } from "../models/order.js";
 import { Product } from "../models/product.js";
 import { User } from "../models/user.js";
-import { MyDocument, calculatePercentage, getChartData, getInventeries } from "../utils/features.js";
+import {
+  MyDocument,
+  calculatePercentage,
+  getChartData,
+  getInventeries,
+} from "../utils/features.js";
 
 export const getDashboard = TryCatch(async (req, res, next) => {
   let stats = {};
@@ -147,7 +152,8 @@ export const getDashboard = TryCatch(async (req, res, next) => {
 
     lastSixMonthOrders.forEach((order) => {
       const creatationDate = order.createdAt;
-      const monthDiff = (today.getMonth() - creatationDate.getMonth() + 12) % 12
+      const monthDiff =
+        (today.getMonth() - creatationDate.getMonth() + 12) % 12;
 
       if (monthDiff < 6) {
         orderMonthCounts[6 - monthDiff - 1] += 1;
@@ -302,7 +308,6 @@ export const getPiChart = TryCatch(async (req, res, next) => {
 //   let charts;
 //   const key = "admin-bar-charts"
 
-
 //   if(myCache.has(key)) charts = JSON.parse(myCache.get(key)!)    // same things You use as string ya null operator(!)
 
 //   else{
@@ -311,12 +316,8 @@ export const getPiChart = TryCatch(async (req, res, next) => {
 //     const sixMonthAgo = new Date();
 //     sixMonthAgo.setMonth(sixMonthAgo.getMonth() - 6);
 
-
 //     const twelveMonthAgo = new Date();
 //     sixMonthAgo.setMonth(sixMonthAgo.getMonth() - 12);
-
-    
-
 
 //     const lastSixMonthProductPromise = Product.find({
 //       createdAt: {
@@ -337,7 +338,6 @@ export const getPiChart = TryCatch(async (req, res, next) => {
 //       },
 //     }).select("createdAt")
 
-
 //     const [
 
 //       products,
@@ -350,17 +350,9 @@ export const getPiChart = TryCatch(async (req, res, next) => {
 //       lastTwelveMonthOrdersPromise
 //     ])
 
-
 //     const productCounts = getChartData({ length: 6, today, docArr: products });
 //     const userCounts = getChartData({ length: 6, today, docArr: users });
 //     const OrderCounts = getChartData({ length: 6, today, docArr: orders });
-
-    
-
-
-
-
-
 
 //     charts = {
 //       users:userCounts,
@@ -375,7 +367,6 @@ export const getPiChart = TryCatch(async (req, res, next) => {
 //     success: true,
 //     charts,
 //   });
-
 
 // });
 
@@ -439,7 +430,68 @@ export const getBarChart = TryCatch(async (req, res, next) => {
   });
 });
 
+export const getlineChart = TryCatch(async (req, res, next) => {
+  let charts;
+  const key = "admin-line-charts";
 
+  if (myCache.has(key)) charts = JSON.parse(myCache.get(key) as string);
+  else {
+    const today = new Date();
 
+    const twelveMonthsAgo = new Date();
+    twelveMonthsAgo.setMonth(twelveMonthsAgo.getMonth() - 12);
 
-export const getlineChart = TryCatch(async (req, res, next) => {});
+    const baseQuery = {
+      createdAt: {
+        $gte: twelveMonthsAgo,
+        $lte: today,
+      },
+    };
+
+    const twelveMonthProductsPromise =
+      Product.find(baseQuery).select("createdAt");
+    const twelveMonthUsersPromise = User.find(baseQuery).select("createdAt");
+    const twelveMonthOrdersPromise = Order.find(baseQuery).select([
+      "createdAt",
+      "discount",
+      "total",
+    ]);
+
+    const [products, users, orders] = await Promise.all([
+      twelveMonthProductsPromise,
+      twelveMonthUsersPromise,
+      twelveMonthOrdersPromise,
+    ]);
+
+    const productCounts = getChartData({ length: 12, today, docArr: products });
+    const usersCounts = getChartData({ length: 12, today, docArr: users });
+    const ordersCounts = getChartData({ length: 12, today, docArr: orders });
+    const discount = getChartData({
+      length: 12,
+      today,
+      docArr: orders,
+      property: "discount",
+    });
+    const revinew = getChartData({
+      length: 12,
+      today,
+      docArr: orders,
+      property: "total",
+    });
+
+    charts = {
+      users: usersCounts,
+      products: productCounts,
+      orders: ordersCounts,
+      discount,
+      revinew,
+    };
+
+    myCache.set(key, JSON.stringify(charts));
+  }
+
+  return res.status(200).json({
+    success: true,
+    charts,
+  });
+});
