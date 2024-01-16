@@ -3,7 +3,7 @@ import NodeCache from "node-cache";
 import { config } from "dotenv";
 import morgan from "morgan";
 import Stripe from "stripe";
-
+import cors from "cors"
 
 // Routes
 import userRoutes from "./routes/user.js";
@@ -26,9 +26,10 @@ config({
   path: ".env",
 });
 app.use(morgan("dev"));
+app.use(cors())
 
 
-export const stripe = new Stripe(process.env.STRIPE_KEY)
+export const stripe = new Stripe((process.env.STRIPE_KEY) as string)
 export const myCache = new NodeCache();
 
 
