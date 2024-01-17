@@ -1,18 +1,31 @@
 import { useState } from "react";
 import ProductCard from "../components/product-cart";
+import { useCategoriesQuery } from "../redux/api/productAPI";
+import toast from "react-hot-toast";
+import { CustomError } from "../types/api-types";
 
 const Search = () => {
+  const {
+    data: categoriesResponse,
+    isLoading: loadingCategories,
+    isError,
+    error,
+  } = useCategoriesQuery("");
+
   const [search, setSearch] = useState("");
   const [sort, setSort] = useState("");
   const [maxPrice, setMaxPrice] = useState(10000000);
   const [category, setCategory] = useState("");
   const [page, setPage] = useState(1);
 
-  const addToCartHandler = () => {
+  const addToCartHandler = () => {};
+  const isPrevPage = page > 1;
+  const isNextPage = page < 4;
 
+
+  if (isError) {
+    toast.error((error as CustomError).data.message);
   }
-  const isPrevPage = page > 1
-  const isNextPage = page < 4
 
   return (
     <div className="product-search-page">
@@ -43,8 +56,11 @@ const Search = () => {
             onChange={(e) => setCategory(e.target.value)}
           >
             <option>None</option>
-            <option value="">sample 1</option>
-            <option value="">sample 2</option>
+            {
+              !loadingCategories && categoriesResponse?.categories.map(i => (
+                <option value={i} key={i}>{i.toLocaleUpperCase()}</option>
+              ))
+            }
           </select>
         </div>
       </aside>
@@ -58,29 +74,35 @@ const Search = () => {
         />
 
         <div className="search-product-list">
-        <ProductCard
-          productId="daoiere"
-          name="macbook"
-          price={23}
-          stock={23}
-          handler={addToCartHandler}
-          photo="https://m.media-amazon.com/images/W/MEDIAX_792452-T1/images/I/71jG+e7roXL._AC_UY218_.jpg"
-        />
-
+          <ProductCard
+            productId="daoiere"
+            name="macbook"
+            price={23}
+            stock={23}
+            handler={addToCartHandler}
+            photo="https://m.media-amazon.com/images/W/MEDIAX_792452-T1/images/I/71jG+e7roXL._AC_UY218_.jpg"
+          />
         </div>
 
-
         <article>
-          <button disabled={!isPrevPage} onClick={() => setPage((prev) => prev - 1)}>Prev</button>
-          <span>{page} of {4}</span>
-          <button disabled={!isNextPage} onClick={() => setPage((prev) => prev + 1)}>Next</button>
-
+          <button
+            disabled={!isPrevPage}
+            onClick={() => setPage((prev) => prev - 1)}
+          >
+            Prev
+          </button>
+          <span>
+            {page} of {4}
+          </span>
+          <button
+            disabled={!isNextPage}
+            onClick={() => setPage((prev) => prev + 1)}
+          >
+            Next
+          </button>
         </article>
       </main>
     </div>
-
-
-
   );
 };
 
