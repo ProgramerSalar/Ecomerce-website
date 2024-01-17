@@ -11,6 +11,7 @@ import { useDispatch, useSelector } from "react-redux";
 import { userExist, userNotExist } from "./redux/reducers/userReducer";
 import { getUser } from "./redux/api/userAPI";
 import { UserReducerInitialState } from "./types/reducer-types";
+import ProtectedRoute from "./components/producted-route";
 
 const Home = lazy(() => import("./pages/Home"));
 const Cart = lazy(() => import("./pages/Cart"));
@@ -66,20 +67,20 @@ const App = () => {
           <Route path="/cart" element={<Cart />} />
           <Route path="/search" element={<Search />} />
           {/* Logged In User Routes  */}
-          <Route>
+          <Route element={<ProtectedRoute isAuthenticated={user ? true : false} />}>
             <Route path="/shipping" element={<Shipping />} />
             <Route path="/orders" element={<Order />} />
             <Route path="/orders/:id" element={<OrderDetails />} />
           </Route>
           {/* Authenticated  */}
-          <Route>
+          <Route element={<ProtectedRoute isAuthenticated={user ? false : true}/>}>
             <Route path="/login" element={<Login />} />
           </Route>
           {/* admin Routes  */}
           <Route
-          // element={
-          //   <ProtectedRoute isAuthenticated={true} adminRoute={true} isAdmin={true} />
-          // }
+          element={
+            <ProtectedRoute isAuthenticated={true} adminOnly={true} admin={user?.role === "admin" ? true : false} />
+          }
           >
             <Route path="/admin/dashboard" element={<Dashboard />} />
             <Route path="/admin/product" element={<Products />} />
