@@ -13,15 +13,21 @@ export const productAPI = createApi({
   baseQuery: fetchBaseQuery({
     baseUrl: `http://localhost:5000/api/v1/product/`,
   }), // base url
+  tagTypes:["product"],   // pass out the tag of invalidate 
   endpoints: (builder) => ({
     latestProducts: builder.query<AllProductsResponse, string>({
       query: () => "latest",
+      providesTags:["product"],
     }),
     allProducts: builder.query<AllProductsResponse, string>({
       query: (id) => `admin-products?id=${id}`,
+      providesTags:["product"],
+
     }),
     categories: builder.query<CategoriesResponse, string>({
       query: () => `getAllCategories`,
+      providesTags:["product"],
+
     }),
     searchProducts: builder.query<
     SearchProductResponse,
@@ -43,7 +49,8 @@ export const productAPI = createApi({
         url:`new?id=${id}`,
         method:"POST",
         body:formData,
-      })
+      }),
+      invalidatesTags:["product"],
     })
   }),
 });
