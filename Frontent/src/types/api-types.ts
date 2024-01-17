@@ -41,3 +41,10 @@ export type SearchProductRequest = {
   sort:string;
   
 }
+
+
+export type NewProductRequest = {
+  id:string;
+  formData:FormData;
+  
+}
