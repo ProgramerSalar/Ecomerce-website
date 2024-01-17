@@ -19,27 +19,39 @@ const Login = () => {
       const provider = new GoogleAuthProvider();
       const { user } = await signInWithPopup(auth, provider);
 
-      const res = await login({
-        name:user.displayName!,
-        email:user.email!,
-        photo:user.photoURL!,
+      console.log({
+        name: user.displayName!,
+        email: user.email!,
+        photo: user.photoURL!,
         gender,
-        role:"user",
-        dob:date,
-        _id:user.uid
+        role: "user",
+        dob: date,
+        _id: user.uid,
+      });
 
-      })
-      if("data" in res){
-        toast.success(res.data.message)
+      const res = await login({
+        name: user.displayName!,
+        email: user.email!,
+        photo: user.photoURL!,
+        gender,
+        role: "user",
+        dob: date,
+        _id: user.uid,
+      });
+      // console.log(res)
 
-      }else{
-        const error = res.error as FetchBaseQueryError
-        const message = (error.data as MessageResponse).message
-        toast.error(message)
+      if ("data" in res) {
+        toast.success(res.data.message);
+   
+        
+      } else {
+        const error = res.error as FetchBaseQueryError;
+        const message = (error.data as MessageResponse).message;
+        toast.error(message);
+     
       }
-      console.log(user);
     } catch (error) {
-      toast.error("signIn Fail");
+      toast.error("Sign In Fail");
     }
   };
   return (

@@ -41,11 +41,12 @@ export const getAllUser = TryCatch(async (req, res, next) => {
 export const getUser = TryCatch(async (req, res, next) => {
     const id = req.params.id;
     const user = await User.findById(id);
+    // const user = await User.findById(req.user._id);
     if (!user)
         return next(new ErrorHandler("User is not Exist!", 400));
     return res.status(201).json({
         success: true,
-        message: user
+        user
     });
 });
 export const deleteUser = TryCatch(async (req, res, next) => {

@@ -64,13 +64,14 @@ export const getUser = TryCatch(
 
     const id = req.params.id;
     const user = await User.findById(id)
+    // const user = await User.findById(req.user._id);
     if(!user)
       return next(new ErrorHandler("User is not Exist!", 400))
     
 
     return res.status(201).json({
       success:true,
-      message:user
+      user
     })
 
   }

@@ -1,7 +1,8 @@
 import { createApi, fetchBaseQuery } from "@reduxjs/toolkit/query/react";
 // import { server } from "../store";
-import { MessageResponse } from "../../types/api-types";
+import { MessageResponse, UserResponse } from "../../types/api-types";
 import { User } from "../../types/types";
+import axios from "axios";
 
 // import { server } from "../store";
 
@@ -18,6 +19,21 @@ export const userAPI = createApi({
     }),
   }),
 });
+
+
+export const getUser = async (id: string) => {
+  try {
+
+    
+    const { data }: { data: UserResponse } = await axios.get(
+      `http://localhost:5000/api/v1/user/${id}`
+    );
+
+    return data;
+  } catch (error) {
+    throw error;
+  }
+};
 
 export const { useLoginMutation } = userAPI;
 
