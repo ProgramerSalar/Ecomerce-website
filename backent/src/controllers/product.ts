@@ -37,10 +37,12 @@ export const getLatestProduct = TryCatch(async (req, res, next) => {
     .limit(5);
     myCache.set("latest-product", JSON.stringify(products))
   }
+  // throw new Error("hello world")
+
 
  
 
-  return res.status(400).json({
+  return res.status(200).json({
     success: true,
     products,
   });
@@ -81,7 +83,7 @@ export const getAdminProducts = TryCatch(async (req, res, next) => {
   }
   
 
-  return res.status(400).json({
+  return res.status(200).json({
     success: true,
     products,
   });
