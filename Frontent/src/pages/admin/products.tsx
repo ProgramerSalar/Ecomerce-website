@@ -43,10 +43,10 @@ const columns: Column<DataType>[] = [
   },
 ];
 
-
-
 const Products = () => {
-  const {user} = useSelector((state:{userReducer:UserReducerInitialState}) => state.userReducer);
+  const { user } = useSelector(
+    (state: { userReducer: UserReducerInitialState }) => state.userReducer
+  );
   // console.log(user)
 
   const { data, isLoading, isError, error } = useAllProductsQuery(user?._id!);
@@ -67,9 +67,7 @@ const Products = () => {
         }))
       );
     }
-
-  },[data])
-  
+  }, [data]);
 
   const Table = TableHOC<DataType>(
     columns,
@@ -82,7 +80,7 @@ const Products = () => {
   return (
     <div className="admin-container">
       <AdminSidebar />
-      <main>{isLoading ? <Skeleton length={30}/> : Table}</main>
+      <main>{isLoading ? <Skeleton length={30} /> : Table}</main>
       <Link to="/admin/product/new" className="create-product-btn">
         <FaPlus />
       </Link>

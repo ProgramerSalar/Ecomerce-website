@@ -5,6 +5,8 @@ import { AllOrders, deleteOrder, getSingleOrder, myOrder, newOrder, processOrder
 
 const app = express.Router()
 
+
+//  /api/v1/orders
 app.post("/new", newOrder)
 app.get("/my", myOrder )
 app.get("/all", isAdmin, AllOrders)

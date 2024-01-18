@@ -41,7 +41,7 @@ export const newOrder = TryCatch(async (req, res, next) => {
         userId: user,
         productId: order.orderItems.map((i) => String(i.productId)),
     });
-    return res.status(201).json({
+    return res.status(200).json({
         success: true,
         message: "Order Placed Successfully",
     });
@@ -55,7 +55,7 @@ export const myOrder = TryCatch(async (req, res, next) => {
         orders = await Order.find({ user: user });
         myCache.set(`my-orders-${user}`, JSON.stringify(orders));
     }
-    return res.status(201).json({
+    return res.status(200).json({
         success: true,
         orders,
     });
@@ -69,7 +69,7 @@ export const AllOrders = TryCatch(async (req, res, next) => {
         orders = await Order.find({}).populate("user", "name");
         myCache.set(key, JSON.stringify(orders));
     }
-    return res.status(201).json({
+    return res.status(200).json({
         success: true,
         orders,
     });
@@ -86,7 +86,7 @@ export const getSingleOrder = TryCatch(async (req, res, next) => {
             return next(new ErrorHandler("Order Not Found", 404));
         myCache.set(key, JSON.stringify(order));
     }
-    return res.status(201).json({
+    return res.status(200).json({
         success: true,
         order,
     });
@@ -115,7 +115,7 @@ export const processOrder = TryCatch(async (req, res, next) => {
         userId: order.user,
         orderId: String(order._id),
     });
-    return res.status(201).json({
+    return res.status(200).json({
         success: true,
         message: "Order Proccessed Successfully",
     });
@@ -133,7 +133,7 @@ export const deleteOrder = TryCatch(async (req, res, next) => {
         userId: order.user,
         orderId: String(order._id),
     });
-    return res.status(201).json({
+    return res.status(200).json({
         success: true,
         message: "Order Deleted Successfully",
     });
