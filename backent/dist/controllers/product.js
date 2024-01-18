@@ -238,4 +238,4 @@ export const deleteRandomProducts = async (count = 10) => {
         success: true
     });
 };
-// deleteRandomProducts(38)
+// deleteRandomProducts(2)
