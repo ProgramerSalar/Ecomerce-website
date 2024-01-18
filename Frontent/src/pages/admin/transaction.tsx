@@ -19,8 +19,6 @@ interface DataType {
   action: ReactElement;
 }
 
-
-
 const columns: Column<DataType>[] = [
   {
     Header: "Avatar",
@@ -61,7 +59,6 @@ const Transaction = () => {
     toast.error(err.data.message);
   }
 
-  
   useEffect(() => {
     if (data)
       setRows(
@@ -88,7 +85,7 @@ const Transaction = () => {
       );
   }, [data]);
   // console.log("user",user)
-// console.log(amount)
+  // console.log(amount)
   const Table = TableHOC<DataType>(
     columns,
     rows,
