@@ -13,6 +13,7 @@ import { getUser } from "./redux/api/userAPI";
 import { UserReducerInitialState } from "./types/reducer-types";
 import ProtectedRoute from "./components/producted-route";
 import Notfound from "./components/not-found";
+import Checkout from "./pages/checkout";
 
 const Home = lazy(() => import("./pages/Home"));
 const Cart = lazy(() => import("./pages/Cart"));
@@ -72,6 +73,7 @@ const App = () => {
             <Route path="/shipping" element={<Shipping />} />
             <Route path="/orders" element={<Order />} />
             <Route path="/orders/:id" element={<OrderDetails />} />
+            <Route path="/pay" element={<Checkout />} />
           </Route>
           {/* Authenticated  */}
           <Route element={<ProtectedRoute isAuthenticated={user ? false : true}/>}>

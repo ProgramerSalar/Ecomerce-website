@@ -300,3 +300,20 @@ animation: skeleon-loading 1.5s infinite;
     font-size: 4rem;
   }
 }
+
+
+.chekout-container{
+  max-width: 400px;
+  width: 100%;
+  margin: auto;
+  >form{
+    @include flex(column, flex-start, stretch, 2rem);
+
+    >button{
+      @include btn(1rem, $color3, $color1);
+      width: 100%;
+      font-size: 1.1rem;
+    }
+  }
+
+}
