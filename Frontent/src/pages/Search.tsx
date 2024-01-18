@@ -7,6 +7,9 @@ import {
 import toast from "react-hot-toast";
 import { CustomError } from "../types/api-types";
 import { Skeleton } from "../components/Loader";
+import { useDispatch } from "react-redux";
+import { CartItem } from "../types/types";
+import { addToCart } from "../redux/reducers/cartReducer";
 
 const Search = () => {
   const {
@@ -22,27 +25,35 @@ const Search = () => {
   const [category, setCategory] = useState("");
   const [page, setPage] = useState(1);
 
-  const {isLoading:productLoading, data:searchedData, isError:productIsError, error:productError} = useSearchProductsQuery({
+  const {
+    isLoading: productLoading,
+    data: searchedData,
+    isError: productIsError,
+    error: productError,
+  } = useSearchProductsQuery({
     search,
     sort,
     category,
     page,
     price: maxPrice,
-
-    
   });
-  console.log(searchedData)
+  console.log(searchedData);
 
-  const addToCartHandler = () => {};
+  const dispatch = useDispatch();
+  const addToCartHandler = (cartItem: CartItem) => {
+    if (cartItem.stock < 1) return toast.error("Out of Stock");
+    dispatch(addToCart(cartItem));
+    toast.success("Added To cart");
+  };
   const isPrevPage = page > 1;
   const isNextPage = page < 4;
 
   if (isError) {
     toast.error((error as CustomError).data.message);
   }
-  if(productIsError){
+  if (productIsError) {
     const err = productError as CustomError;
-    toast.error(err.data.message)
+    toast.error(err.data.message);
   }
 
   return (
@@ -92,47 +103,43 @@ const Search = () => {
           onChange={(e) => setSearch(e.target.value)}
         />
 
-        {
-          productLoading ? <Skeleton length={20} /> : <div className="search-product-list">
-          
-          {
-            searchedData?.products.map((i) => (
+        {productLoading ? (
+          <Skeleton length={20} />
+        ) : (
+          <div className="search-product-list">
+            {searchedData?.products.map((i) => (
               <ProductCard
-              key={i._id}
-            productId={i._id}
-            name={i.name}
-            price={i.price}
-            stock={i.stock}
-            handler={addToCartHandler}
-            photo={i.photo}
-          />
+                key={i._id}
+                productId={i._id}
+                name={i.name}
+                price={i.price}
+                stock={i.stock}
+                handler={addToCartHandler}
+                photo={i.photo}
+              />
+            ))}
+          </div>
+        )}
 
-            ))
-          }
-        </div>
-        }
-
-        {
-          searchedData && searchedData.totalPage > 1 &&(
-            <article>
-          <button
-            disabled={!isPrevPage}
-            onClick={() => setPage((prev) => prev - 1)}
-          >
-            Prev
-          </button>
-          <span>
-            {page} of {searchedData.totalPage}
-          </span>
-          <button
-            disabled={!isNextPage}
-            onClick={() => setPage((prev) => prev + 1)}
-          >
-            Next
-          </button>
-        </article>
-          )
-        }
+        {searchedData && searchedData.totalPage > 1 && (
+          <article>
+            <button
+              disabled={!isPrevPage}
+              onClick={() => setPage((prev) => prev - 1)}
+            >
+              Prev
+            </button>
+            <span>
+              {page} of {searchedData.totalPage}
+            </span>
+            <button
+              disabled={!isNextPage}
+              onClick={() => setPage((prev) => prev + 1)}
+            >
+              Next
+            </button>
+          </article>
+        )}
       </main>
     </div>
   );

@@ -18,6 +18,8 @@ export type UserResponse = {
   user: User;
 };
 
+// Products
+
 export type AllProductsResponse = {
   success: boolean;
   products: Product[];
@@ -64,3 +66,5 @@ export type ProductResponse = {
   success:boolean;
   product:Product;
 }
+
+
