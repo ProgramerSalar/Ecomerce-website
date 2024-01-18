@@ -5,7 +5,7 @@ import { Link } from "react-router-dom";
 import { Column } from "react-table";
 import { Skeleton } from "../components/Loader";
 import TableHOC from "../components/admin/TableHOC";
-import { useAllOrdersQuery, useMyOrdersQuery } from "../redux/api/orderAPI";
+import {  useMyOrdersQuery } from "../redux/api/orderAPI";
 import { CustomError } from "../types/api-types";
 import { UserReducerInitialState } from "../types/reducer-types";
 

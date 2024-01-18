@@ -68,10 +68,18 @@ export type ProductResponse = {
 }
 
 
+export type AllOrdersResponse = {
+  success: boolean;
+  orders: Order[];
+};
+export type OrderDetailsResponse = {
+  success: boolean;
+  order: Order;
+};
 
 export type NewOrderRequest = {
   shippingInfo: ShippingInfo;
-  orderItems: OrderItem[];
+  orderItems: CartItem[];
   subtotal: number;
   tax: number;
   shippingCharges: number;
@@ -79,15 +87,6 @@ export type NewOrderRequest = {
   total: number;
   user: string;
 };
-
-export type AllOrdersResponse = {
-  success:boolean;
-  orders:Order[];
-}
-export type OrderDetailsResponse = {
-  success:boolean;
-  orders:Order;
-}
 
 export type UpdateOrderRequest = {
   userId: string;
