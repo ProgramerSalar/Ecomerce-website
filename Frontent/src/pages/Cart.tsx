@@ -25,7 +25,7 @@ const Cart = () => {
   const dispatch = useDispatch();
 
   useEffect(() => {
-    const { token: cancelToken, cancel } = axios.CancelToken.source();
+    const { token: cancelToken, cancel } = axios.CancelToken.source();  // if your network are slow you discount are pendint, you can do remove the pending things
     const timeOutId = setTimeout(() => {
       axios
         .get(`${server}/api/v1/payment/discount?coupon=${couponCode}`, {
