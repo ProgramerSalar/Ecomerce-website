@@ -1,9 +1,16 @@
+import axios from "axios";
 import { useEffect, useState } from "react";
 import { VscError } from "react-icons/vsc";
 import { useDispatch, useSelector } from "react-redux";
 import { Link } from "react-router-dom";
 import CartItemCard from "../components/cart-item";
-import { addToCart, calculatePrice, removeCartItem } from "../redux/reducers/cartReducer";
+import {
+  addToCart,
+  calculatePrice,
+  discountApplied,
+  removeCartItem,
+} from "../redux/reducers/cartReducer";
+import { server } from "../redux/store";
 import { CartReducerInitialState } from "../types/reducer-types";
 import { CartItem } from "../types/types";
 
@@ -15,11 +22,23 @@ const Cart = () => {
 
   const [couponCode, setCouponCode] = useState<String>("");
   const [isValidCouponCode, setIsValidCouponCode] = useState<boolean>(false);
+  const dispatch = useDispatch();
 
   useEffect(() => {
     const timeOutId = setTimeout(() => {
-      if (Math.random() > 0.5) setIsValidCouponCode(true);
-      else setIsValidCouponCode(false);
+      axios
+        .get(`${server}/api/v1/payment/discount?coupon=${couponCode}`)
+        .then((res) => {
+          // console.log(res.data)
+          dispatch(discountApplied(res.data.discount));
+          setIsValidCouponCode(true);
+        })
+        .catch(() => {
+          // console.log(e.response.data.message)
+          dispatch(discountApplied(0));
+
+          setIsValidCouponCode(false);
+        });
     }, 1000);
 
     return () => {
@@ -27,24 +46,21 @@ const Cart = () => {
       setIsValidCouponCode(false);
     };
   }, [couponCode]);
-  const dispatch = useDispatch();
 
   useEffect(() => {
-    dispatch(calculatePrice())
+    dispatch(calculatePrice());
+  }, [cartItems]);
 
-  },[cartItems])
-
- 
   const incrementHandler = (cartItem: CartItem) => {
-    if(cartItem.quantity >=  cartItem.stock) return
+    if (cartItem.quantity >= cartItem.stock) return;
     dispatch(addToCart({ ...cartItem, quantity: cartItem.quantity + 1 }));
   };
   const decrementHandler = (cartItem: CartItem) => {
-    if(cartItem.quantity <= 1) return
+    if (cartItem.quantity <= 1) return;
     dispatch(addToCart({ ...cartItem, quantity: cartItem.quantity - 1 }));
   };
-  const removeHandler = (productId:string) => {
-    dispatch(removeCartItem(productId))
+  const removeHandler = (productId: string) => {
+    dispatch(removeCartItem(productId));
   };
 
   return (
