@@ -290,3 +290,13 @@ animation: skeleon-loading 1.5s infinite;
     transform: translate(-50%, -20%);
   }
 }
+
+
+
+.container-not-found{
+  height: 80vh;
+  @include flex(column);
+  >svg{
+    font-size: 4rem;
+  }
+}
