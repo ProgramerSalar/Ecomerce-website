@@ -35,12 +35,13 @@ const Cart = () => {
           // console.log(res.data)
           dispatch(discountApplied(res.data.discount));
           setIsValidCouponCode(true);
+          dispatch(calculatePrice())
         })
         .catch(() => {
           // console.log(e.response.data.message)
           dispatch(discountApplied(0));
-
           setIsValidCouponCode(false);
+          dispatch(calculatePrice())
         });
     }, 1000);
 
