@@ -52,7 +52,7 @@ export const getAllUser = TryCatch(
     const users = await User.find({})
     return res.status(201).json({
       success:true,
-      message:users
+      users
     })
 
   }

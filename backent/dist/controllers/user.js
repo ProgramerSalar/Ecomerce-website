@@ -35,7 +35,7 @@ export const getAllUser = TryCatch(async (req, res, next) => {
     const users = await User.find({});
     return res.status(201).json({
         success: true,
-        message: users
+        users
     });
 });
 export const getUser = TryCatch(async (req, res, next) => {
