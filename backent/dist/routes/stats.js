@@ -5,7 +5,7 @@ const app = express.Router();
 // route - /api/v1/dashboard/stats 
 app.get("/stats", isAdmin, getDashboard);
 // route - /api/v1/dashboard/pi
-app.get("/pi", isAdmin, getPiChart);
+app.get("/pie", isAdmin, getPiChart);
 // route - /api/v1/dashboard/bar
 app.get("/bar", isAdmin, getBarChart);
 // route - /api/v1/dashboard/line

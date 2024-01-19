@@ -12,7 +12,7 @@ app.get("/stats", isAdmin,getDashboard)
 
 
 // route - /api/v1/dashboard/pi
-app.get("/pi",isAdmin, getPiChart)
+app.get("/pie",isAdmin, getPiChart)
 
 // route - /api/v1/dashboard/bar
 app.get("/bar",isAdmin, getBarChart)
