@@ -12,6 +12,14 @@ import { CartItem } from "../types/types";
 import { addToCart } from "../redux/reducers/cartReducer";
 
 const Search = () => {
+
+
+  
+
+
+
+
+
   const {
     data: categoriesResponse,
     isLoading: loadingCategories,

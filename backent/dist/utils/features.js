@@ -64,13 +64,13 @@ export const calculatePercentage = (thisMonth, lastMonth) => {
     const percent = (thisMonth / lastMonth) * 100;
     return Number(percent.toFixed(0));
 };
-export const getInventeries = async ({ categories, productCount, }) => {
+export const getInventories = async ({ categories, productsCount, }) => {
     const categoriesCountPromise = categories.map((category) => Product.countDocuments({ category }));
     const categoriesCount = await Promise.all(categoriesCountPromise);
-    const categoryCount = []; // categoryCount ka Rrecord me  string or number in array
+    const categoryCount = [];
     categories.forEach((category, i) => {
         categoryCount.push({
-            [category]: Math.round((categoriesCount[i] / productCount) * 100),
+            [category]: Math.round((categoriesCount[i] / productsCount) * 100),
         });
     });
     return categoryCount;

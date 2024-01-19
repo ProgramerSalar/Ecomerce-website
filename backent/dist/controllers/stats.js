@@ -3,7 +3,7 @@ import { TryCatch } from "../middlewares/error.js";
 import { Order } from "../models/order.js";
 import { Product } from "../models/product.js";
 import { User } from "../models/user.js";
-import { calculatePercentage, getChartData, getInventeries, } from "../utils/features.js";
+import { calculatePercentage, getChartData, getInventories, } from "../utils/features.js";
 export const getDashboard = TryCatch(async (req, res, next) => {
     let stats = {};
     const key = "admin-stats";
@@ -11,128 +11,126 @@ export const getDashboard = TryCatch(async (req, res, next) => {
         stats = JSON.parse(myCache.get(key));
     else {
         const today = new Date();
-        const sixMonthAgo = new Date();
-        sixMonthAgo.setMonth(sixMonthAgo.getMonth() - 6);
+        const sixMonthsAgo = new Date();
+        sixMonthsAgo.setMonth(sixMonthsAgo.getMonth() - 6);
         const thisMonth = {
             start: new Date(today.getFullYear(), today.getMonth(), 1),
             end: today,
         };
         const lastMonth = {
-            start: new Date(today.getFullYear(), today.getMonth(), -1, 1),
+            start: new Date(today.getFullYear(), today.getMonth() - 1, 1),
             end: new Date(today.getFullYear(), today.getMonth(), 0),
         };
-        // products
         const thisMonthProductsPromise = Product.find({
             createdAt: {
-                $gt: thisMonth.start,
+                $gte: thisMonth.start,
                 $lte: thisMonth.end,
             },
         });
         const lastMonthProductsPromise = Product.find({
             createdAt: {
-                $gt: lastMonth.start,
+                $gte: lastMonth.start,
                 $lte: lastMonth.end,
             },
         });
-        // user
-        const thisMonthUserPromise = User.find({
+        const thisMonthUsersPromise = User.find({
             createdAt: {
-                $gt: thisMonth.start,
+                $gte: thisMonth.start,
                 $lte: thisMonth.end,
             },
         });
-        const lastMonthUserPromise = User.find({
+        const lastMonthUsersPromise = User.find({
             createdAt: {
-                $gt: lastMonth.start,
+                $gte: lastMonth.start,
                 $lte: lastMonth.end,
             },
         });
-        // orders
         const thisMonthOrdersPromise = Order.find({
             createdAt: {
-                $gt: thisMonth.start,
+                $gte: thisMonth.start,
                 $lte: thisMonth.end,
             },
         });
         const lastMonthOrdersPromise = Order.find({
             createdAt: {
-                $gt: lastMonth.start,
+                $gte: lastMonth.start,
                 $lte: lastMonth.end,
             },
         });
-        // last six month order
-        const lastSixMonthOrderPromise = Order.find({
+        const lastSixMonthOrdersPromise = Order.find({
             createdAt: {
-                $gte: sixMonthAgo,
+                $gte: sixMonthsAgo,
                 $lte: today,
             },
         });
-        const latestTransationsPromise = Order.find({})
+        const latestTransactionsPromise = Order.find({})
             .select(["orderItems", "discount", "total", "status"])
             .limit(4);
-        const [thisMonthProducts, thisMonthUser, thisMonthOrders, lastMonthProducts, lastMonthUser, lastMonthOrders, productCount, userCount, allOrders, lastSixMonthOrders, categories, femaleUserCounts, latestTransation,] = await Promise.all([
+        const [thisMonthProducts, thisMonthUsers, thisMonthOrders, lastMonthProducts, lastMonthUsers, lastMonthOrders, productsCount, usersCount, allOrders, lastSixMonthOrders, categories, femaleUsersCount, latestTransaction,] = await Promise.all([
             thisMonthProductsPromise,
-            thisMonthUserPromise,
+            thisMonthUsersPromise,
             thisMonthOrdersPromise,
             lastMonthProductsPromise,
-            lastMonthUserPromise,
+            lastMonthUsersPromise,
             lastMonthOrdersPromise,
             Product.countDocuments(),
             User.countDocuments(),
             Order.find({}).select("total"),
-            lastSixMonthOrderPromise,
+            lastSixMonthOrdersPromise,
             Product.distinct("category"),
             User.countDocuments({ gender: "female" }),
-            latestTransationsPromise,
+            latestTransactionsPromise,
         ]);
         const thisMonthRevenue = thisMonthOrders.reduce((total, order) => total + (order.total || 0), 0);
         const lastMonthRevenue = lastMonthOrders.reduce((total, order) => total + (order.total || 0), 0);
-        const changepercent = {
-            revenew: calculatePercentage(thisMonthRevenue, lastMonthRevenue),
+        const changePercent = {
+            revenue: calculatePercentage(thisMonthRevenue, lastMonthRevenue),
             product: calculatePercentage(thisMonthProducts.length, lastMonthProducts.length),
-            user: calculatePercentage(thisMonthUser.length, lastMonthUser.length),
+            user: calculatePercentage(thisMonthUsers.length, lastMonthUsers.length),
             order: calculatePercentage(thisMonthOrders.length, lastMonthOrders.length),
         };
-        const revinew = allOrders.reduce((total, order) => total + (order.total || 0), 0);
+        const revenue = allOrders.reduce((total, order) => total + (order.total || 0), 0);
         const count = {
-            revinew: revinew,
-            user: userCount,
-            product: productCount,
+            revenue,
+            product: productsCount,
+            user: usersCount,
             order: allOrders.length,
         };
         const orderMonthCounts = new Array(6).fill(0);
-        const orderMonthRevinew = new Array(6).fill(0);
+        const orderMonthyRevenue = new Array(6).fill(0);
         lastSixMonthOrders.forEach((order) => {
-            const creatationDate = order.createdAt;
-            const monthDiff = (today.getMonth() - creatationDate.getMonth() + 12) % 12;
+            const creationDate = order.createdAt;
+            const monthDiff = (today.getMonth() - creationDate.getMonth() + 12) % 12;
             if (monthDiff < 6) {
                 orderMonthCounts[6 - monthDiff - 1] += 1;
-                orderMonthRevinew[6 - monthDiff - 1] += order.total;
+                orderMonthyRevenue[6 - monthDiff - 1] += order.total;
             }
         });
-        // categoryCount ka Rrecord me  string or number in array
-        const categoryCount = await getInventeries({ categories, productCount });
-        const modifiedLatestTransation = latestTransation.map((i) => ({
+        const categoryCount = await getInventories({
+            categories,
+            productsCount
+        });
+        const userRatio = {
+            male: usersCount - femaleUsersCount,
+            female: femaleUsersCount,
+        };
+        const modifiedLatestTransaction = latestTransaction.map((i) => ({
             _id: i._id,
             discount: i.discount,
             amount: i.total,
             quantity: i.orderItems.length,
             status: i.status,
         }));
-        const userRatio = {
-            male: userCount - femaleUserCounts,
-            female: femaleUserCounts,
-        };
         stats = {
             categoryCount,
-            changepercent,
+            changePercent,
             count,
             chart: {
                 order: orderMonthCounts,
-                revinew: orderMonthRevinew,
+                revenue: orderMonthyRevenue,
             },
             userRatio,
-            latestTransation: modifiedLatestTransation,
+            latestTransaction: modifiedLatestTransaction,
         };
         myCache.set(key, JSON.stringify(stats));
     }
@@ -147,49 +145,50 @@ export const getPiChart = TryCatch(async (req, res, next) => {
     if (myCache.has(key))
         charts = JSON.parse(myCache.get(key));
     else {
-        const [processingOrder, shippedOrder, deliveredOrder, categories, productCount, OutOfStock, allOrders, allUsers, adminUsers, CustomerUser,] = await Promise.all([
+        const allOrderPromise = Order.find({}).select([
+            "total",
+            "discount",
+            "subtotal",
+            "tax",
+            "shippingCharges",
+        ]);
+        const [processingOrder, shippedOrder, deliveredOrder, categories, productsCount, outOfStock, allOrders, allUsers, adminUsers, customerUsers,] = await Promise.all([
             Order.countDocuments({ status: "Processing" }),
             Order.countDocuments({ status: "Shipped" }),
             Order.countDocuments({ status: "Delivered" }),
             Product.distinct("category"),
             Product.countDocuments(),
             Product.countDocuments({ stock: 0 }),
-            Order.find({}).select([
-                "total",
-                "discount",
-                "subtotal",
-                "tax",
-                "shippingCharges",
-            ]),
+            allOrderPromise,
             User.find({}).select(["dob"]),
             User.countDocuments({ role: "admin" }),
             User.countDocuments({ role: "user" }),
         ]);
-        const orderFullFillment = {
+        const orderFullfillment = {
             processing: processingOrder,
             shipped: shippedOrder,
-            deliver: deliveredOrder,
+            delivered: deliveredOrder,
         };
-        const productCategoryRatio = await getInventeries({
+        const productCategories = await getInventories({
             categories,
-            productCount,
+            productsCount,
         });
         const stockAvailablity = {
-            inStock: productCount - OutOfStock,
-            OutOfStock,
+            inStock: productsCount - outOfStock,
+            outOfStock,
         };
         const grossIncome = allOrders.reduce((prev, order) => prev + (order.total || 0), 0);
         const discount = allOrders.reduce((prev, order) => prev + (order.discount || 0), 0);
         const productionCost = allOrders.reduce((prev, order) => prev + (order.shippingCharges || 0), 0);
-        const burn = allOrders.reduce((prev, order) => prev + (order.tax || 0), 0);
-        const markatingCost = Math.round(grossIncome * (30 / 100));
-        const netMargin = grossIncome - discount - productionCost - burn - markatingCost;
-        const revinewDistribution = {
+        const burnt = allOrders.reduce((prev, order) => prev + (order.tax || 0), 0);
+        const marketingCost = Math.round(grossIncome * (30 / 100));
+        const netMargin = grossIncome - discount - productionCost - burnt - marketingCost;
+        const revenueDistribution = {
             netMargin,
             discount,
             productionCost,
-            burn,
-            markatingCost,
+            burnt,
+            marketingCost,
         };
         const usersAgeGroup = {
             teen: allUsers.filter((i) => i.age < 20).length,
@@ -198,13 +197,13 @@ export const getPiChart = TryCatch(async (req, res, next) => {
         };
         const adminCustomer = {
             admin: adminUsers,
-            customer: CustomerUser,
+            customer: customerUsers,
         };
         charts = {
-            orderFullFillment,
-            productCategoryRatio,
+            orderFullfillment,
+            productCategories,
             stockAvailablity,
-            revinewDistribution,
+            revenueDistribution,
             usersAgeGroup,
             adminCustomer,
         };
