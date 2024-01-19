@@ -19,6 +19,7 @@ const Barcharts = () => {
 
   const products = data?.charts.products || [];
   const orders = data?.charts.orders || [];
+  console.log(orders)
   const users = data?.charts.users || [];
 
   if (isError) {
@@ -51,8 +52,8 @@ const Barcharts = () => {
         <section>
           <BarChart
            horizontal={true}
-           data_1={orders}
-           data_2={[]}
+          //  data_1={orders}
+           data_2={orders}
            title_1="Orders"
            title_2=""
            bgColor_1={`hsl(180, 40%, 50%)`}

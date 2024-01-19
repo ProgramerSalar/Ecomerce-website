@@ -328,63 +328,125 @@ export const getPiChart = TryCatch(async (req, res, next) => {
 
 
 
+// export const getBarChart = TryCatch(async (req, res, next) => {
+//   let charts;
+//   const key = "admin-bar-charts";
+
+//   if (myCache.has(key)) {
+//     charts = JSON.parse(myCache.get(key)!);
+//   } else {
+//     const today = new Date();
+//     const sixMonthAgo = new Date();
+//     sixMonthAgo.setMonth(sixMonthAgo.getMonth() - 6);
+
+//     const twelveMonthAgo = new Date();
+//     sixMonthAgo.setMonth(sixMonthAgo.getMonth() - 12);
+
+//     const lastSixMonthProductPromise = Product.find({
+//       createdAt: {
+//         $gte: sixMonthAgo,
+//         $lte: today,
+//       },
+//     });
+//     const lastSixMonthUsersPromise = Product.find({
+//       createdAt: {
+//         $gte: sixMonthAgo,
+//         $lte: today,
+//       },
+//     });
+//     const lastTwelveMonthOrdersPromise = Product.find({
+//       createdAt: {
+//         $gte: twelveMonthAgo,
+//         $lte: today,
+//       },
+//     });
+
+//     const [products, users, orders] = await Promise.all([
+//       lastSixMonthProductPromise,
+//       lastSixMonthUsersPromise,
+//       lastTwelveMonthOrdersPromise,
+//     ]);
+
+//     const productCounts = getChartData({ length: 6, today, docArr: products });
+//     const userCounts = getChartData({ length: 6, today, docArr: users });
+//     const orderCounts = getChartData({ length: 12, today, docArr: orders });
+
+//     charts = {
+//       user: userCounts,
+//       products: productCounts,
+//       orders: orderCounts,
+//     };
+
+//     myCache.set(key, JSON.stringify(charts));
+//   }
+
+//   res.status(200).json({
+//     success: true,
+//     charts,
+//   });
+// });
+
 export const getBarChart = TryCatch(async (req, res, next) => {
   let charts;
   const key = "admin-bar-charts";
 
-  if (myCache.has(key)) {
-    charts = JSON.parse(myCache.get(key)!);
-  } else {
+  if (myCache.has(key)) charts = JSON.parse(myCache.get(key) as string);
+  else {
     const today = new Date();
-    const sixMonthAgo = new Date();
-    sixMonthAgo.setMonth(sixMonthAgo.getMonth() - 6);
 
-    const twelveMonthAgo = new Date();
-    sixMonthAgo.setMonth(sixMonthAgo.getMonth() - 12);
+    const sixMonthsAgo = new Date();
+    sixMonthsAgo.setMonth(sixMonthsAgo.getMonth() - 6);
 
-    const lastSixMonthProductPromise = Product.find({
+    const twelveMonthsAgo = new Date();
+    twelveMonthsAgo.setMonth(twelveMonthsAgo.getMonth() - 12);
+
+    const sixMonthProductPromise = Product.find({
       createdAt: {
-        $gte: sixMonthAgo,
+        $gte: sixMonthsAgo,
         $lte: today,
       },
-    });
-    const lastSixMonthUsersPromise = Product.find({
+    }).select("createdAt");
+
+    const sixMonthUsersPromise = User.find({
       createdAt: {
-        $gte: sixMonthAgo,
+        $gte: sixMonthsAgo,
         $lte: today,
       },
-    });
-    const lastTwelveMonthOrdersPromise = Product.find({
+    }).select("createdAt");
+
+    const twelveMonthOrdersPromise = Order.find({
       createdAt: {
-        $gte: twelveMonthAgo,
+        $gte: twelveMonthsAgo,
         $lte: today,
       },
-    });
+    }).select("createdAt");
 
     const [products, users, orders] = await Promise.all([
-      lastSixMonthProductPromise,
-      lastSixMonthUsersPromise,
-      lastTwelveMonthOrdersPromise,
+      sixMonthProductPromise,
+      sixMonthUsersPromise,
+      twelveMonthOrdersPromise,
     ]);
 
     const productCounts = getChartData({ length: 6, today, docArr: products });
-    const userCounts = getChartData({ length: 6, today, docArr: users });
-    const orderCounts = getChartData({ length: 12, today, docArr: orders });
+    const usersCounts = getChartData({ length: 6, today, docArr: users });
+    const ordersCounts = getChartData({ length: 12, today, docArr: orders });
 
     charts = {
-      user: userCounts,
+      users: usersCounts,
       products: productCounts,
-      orders: orderCounts,
+      orders: ordersCounts,
     };
 
     myCache.set(key, JSON.stringify(charts));
   }
 
-  res.status(200).json({
+  return res.status(200).json({
     success: true,
     charts,
   });
 });
+
+
 
 export const getlineChart = TryCatch(async (req, res, next) => {
   let charts;
